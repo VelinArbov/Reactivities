@@ -1,109 +1,92 @@
-import { IActivity } from "../../../../app/layout/models/Activity";
-import React, { FormEvent, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Button, Form, Segment } from "semantic-ui-react";
-import { v4 as uuid } from "uuid";
+import { Activity } from "../../../../app/layout/models/Activity";
 
-interface IProps {
-  setEditMode: (editMode: boolean) => void;
-  activity: IActivity;
-  createActivity: (activity: IActivity) => void;
-  editActivity: (activity: IActivity) => void;
+interface Props {
+  activity: Activity | undefined;
+  closeForm: () => void;
+  createOrEdit: (activity: Activity) => void;
   submitting: boolean;
 }
-export const ActivityForm: React.FC<IProps> = ({
-  setEditMode,
-  activity: initialFormState,
-  createActivity,
-  editActivity,
+
+export default function ActivityForm({
+  activity: selectedActivity,
+  closeForm,
+  createOrEdit,
   submitting,
-}) => {
-  const initializeForm = () => {
-    if (initialFormState) {
-      return initialFormState;
-    } else {
-      return {
-        id: "",
-        title: "",
-        category: "",
-        description: "",
-        date: "",
-        city: "",
-        venue: "",
-      };
-    }
+}: Props) {
+  const initialState = selectedActivity ?? {
+    id: "",
+    title: "",
+    category: "",
+    description: "",
+    date: "",
+    city: "",
+    venue: "",
   };
 
-  const [activity, setActivity] = useState<IActivity>(initializeForm);
+  const [activity, setActivity] = useState(initialState);
 
-  const handlerSubmit = () => {
-    if (activity.id.length === 0) {
-      let newActivity = {
-        ...activity,
-        id: uuid(),
-      };
-      createActivity(newActivity);
-    } else {
-      editActivity(activity);
-    }
-  };
+  function handleSubmit() {
+    createOrEdit(activity);
+  }
 
-  const handlerInputChange = (
-    event: FormEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.currentTarget;
+  function handleInputChange(
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = event.target;
     setActivity({ ...activity, [name]: value });
-  };
+  }
 
   return (
     <Segment clearing>
-      <Form onSubmit={handlerSubmit}>
+      <Form onSubmit={handleSubmit} autoComplete="off">
         <Form.Input
-          onChange={handlerInputChange}
-          name="title"
           placeholder="Title"
           value={activity.title}
+          name="title"
+          onChange={handleInputChange}
         />
         <Form.TextArea
-          onChange={handlerInputChange}
-          name="description"
-          rows={2}
           placeholder="Description"
           value={activity.description}
+          name="description"
+          onChange={handleInputChange}
         />
         <Form.Input
           placeholder="Category"
-          onChange={handlerInputChange}
-          name="category"
           value={activity.category}
+          name="category"
+          onChange={handleInputChange}
         />
         <Form.Input
-          onChange={handlerInputChange}
-          name="date"
-          type="datetime-local"
+          type="date"
           placeholder="Date"
           value={activity.date}
+          name="date"
+          onChange={handleInputChange}
         />
         <Form.Input
-          onChange={handlerInputChange}
-          name="city"
           placeholder="City"
           value={activity.city}
+          name="city"
+          onChange={handleInputChange}
         />
         <Form.Input
-          onChange={handlerInputChange}
-          name="venue"
           placeholder="Venue"
           value={activity.venue}
+          name="venue"
+          onChange={handleInputChange}
         />
         <Button
           loading={submitting}
           floated="right"
           positive
-          type="submit"
+          type="submit" 
           content="Submit"
         />
         <Button
-          onClick={() => setEditMode(false)}
+          onClick={closeForm}
           floated="right"
           type="button"
           content="Cancel"
@@ -111,4 +94,4 @@ export const ActivityForm: React.FC<IProps> = ({
       </Form>
     </Segment>
   );
-};
+}
