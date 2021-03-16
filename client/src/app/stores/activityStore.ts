@@ -1,24 +1,38 @@
-import { observable, action } from "mobx";
-import { createContext } from "react";
+import { makeAutoObservable } from "mobx";
 import agent from "../api/agent";
 import { Activity } from "../layout/models/Activity";
 
-class ActivityStore {
-    @observable activities : Activity[] = [];
-    @observable loadingInitial = false;
+export default class ActivityStore {
+     activities : Activity[] = [];
+     selectedActivity : Activity | null = null;
+     editMode = false;
+     loading = false;
+     loadingInitial = false;
 
-    @action loadActivities = () => {
-        this.loadingInitial = true;
-        agent.Activities.list()
-        .then((activities) => {
-        activities.forEach((activity: Activity) => {
-          activity.date = activity.date.split(".")[0];
+   constructor(){
+     makeAutoObservable(this)
+   }
+
+
+   loadActivities = async () => {
+     this.loadingInitial= true;
+     try{
+      const activities = await agent.Activities.list();
+        activities.forEach((activity) => {
+          activity.date = activity.date.split("T")[0];
           this.activities.push(activity);
         });
-      })
-      .finally(() => this.loadingInitial = false);
-    }
+        this.loadingInitial = false;
+
+     }catch(error)
+     {
+       console.log(error);
+       this.loadingInitial = false;
+
+     }
+   }
+
+
 
 }
 
-export default createContext(new ActivityStore());
